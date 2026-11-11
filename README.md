@@ -1,2 +1,6 @@
-# Sechenya-for-10-11-class
-test
+# Стереометрия 3D — конструктор сечений
+
+Запуск в VS Code: откройте папку, установите расширение **Live Server**, правый клик на `index.html` → *Open with Live Server*
+(или просто откройте `index.html` в браузере). Нужен интернет — Vue 3 и Three.js подключаются по CDN.
+
+Файлы: `index.html` (разметка Vue), `style.css` (стили), `script.js` (фигуры, математика сечений, 3D).

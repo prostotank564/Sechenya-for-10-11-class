@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Стереометрия 3D — конструктор сечений</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" v-cloak :class="{wide: !showExplain}">
+
+  <header class="top">
+    <div class="logo">◆ Стереометрия&nbsp;3D</div>
+    <div class="sub">Конструктор сечений · 10–11 класс</div>
+  </header>
+
+  <!-- ЛЕВАЯ ПАНЕЛЬ: управление -->
+  <aside class="panel side-l">
+    <section>
+      <h3>Фигура</h3>
+      <div class="shapes">
+        <button v-for="s in shapes" :key="s.key" class="chip" :class="{on: s.key === shapeKey}" @click="selectShape(s.key)">{{ s.name }}</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>Способ построения</h3>
+      <div class="seg">
+        <button :class="{on: mode === 'auto'}" @click="setMode('auto')">Автоматически</button>
+        <button :class="{on: mode === 'traces'}" @click="setMode('traces')">Метод следов</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>Действия</h3>
+      <div class="btns">
+        <button class="btn primary" @click="autoBuild">⚡ Автопостроение</button>
+        <button class="btn" @click="showAnswer">✔ Готовый ответ</button>
+        <button class="btn" :disabled="!canUndo" @click="undo">↶ Отменить</button>
+        <button class="btn danger" :disabled="!ptCount" @click="clearPoints">✕ Удалить точки</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>Ракурс</h3>
+      <div class="btns two">
+        <button class="btn" @click="setView('front')">Спереди</button>
+        <button class="btn" @click="setView('side')">Сбоку</button>
+        <button class="btn" @click="setView('top')">Сверху</button>
+        <button class="btn" @click="setView('iso')">Изометрия</button>
+      </div>
+      <button class="btn wide-btn" @click="resetCamera">⟲ Сбросить камеру</button>
+    </section>
+
+    <section>
+      <h3>Отображение</h3>
+      <label class="check"><input type="checkbox" v-model="showHidden"> Невидимые рёбра</label>
+      <label class="check"><input type="checkbox" v-model="showVerts"> Названия вершин</label>
+      <label class="check"><input type="checkbox" v-model="showPoints"> Обозначения точек</label>
+      <label class="check color">Цвет сечения <input type="color" v-model="color"></label>
+    </section>
+  </aside>
+
+  <!-- ЦЕНТР: 3D-сцена -->
+  <main class="stage">
+    <div ref="view" class="view"></div>
+    <div class="hud tl">ЛКМ-клик — поставить точку · перетащите точку, чтобы переместить · ЛКМ-движение — вращение · ПКМ — сдвиг · колесо — масштаб</div>
+    <transition name="pop"><div class="badge" v-if="polyName">Сечение: <b>{{ polyName }}</b></div></transition>
+    <div class="msg" :class="{warn: isWarn}">{{ message }}</div>
+    <button class="toggle-explain" @click="showExplain = !showExplain">{{ showExplain ? 'Скрыть объяснения ▸' : '◂ Показать объяснения' }}</button>
+  </main>
+
+  <!-- ПРАВАЯ ПАНЕЛЬ: ход построения -->
+  <aside class="panel side-r" v-show="showExplain">
+    <h3>Ход построения</h3>
+    <div class="stepper" v-if="stepList.length">
+      <button class="btn sm" :disabled="step <= 1" @click="step--">◀</button>
+      <span>Шаг {{ step }} из {{ stepList.length }}</span>
+      <button class="btn sm" :disabled="step >= stepList.length" @click="step++">▶</button>
+    </div>
+    <div class="steps-wrap" ref="listEl">
+      <p class="empty" v-if="!stepList.length">Поставьте на фигуре три точки — здесь появится пошаговое объяснение, соответствующее именно вашему построению.</p>
+      <transition-group name="step" tag="ol" class="steps">
+        <template v-for="(s, i) in stepList" :key="i + mode">
+          <li v-if="i < step" :class="{cur: i === step - 1, final: s.final}" @click="step = i + 1">
+            <b v-if="!s.final">Шаг {{ i + 1 }}.</b> {{ s.text }}
+          </li>
+        </template>
+      </transition-group>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
